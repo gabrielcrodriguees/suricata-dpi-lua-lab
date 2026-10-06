@@ -4,7 +4,7 @@ Este repositório contém os materiais do projeto desenvolvido para a unidade cu
 
 ## Objetivo do Projeto
 
-O objetivo deste laboratório foi obter uma compreensão prática do funcionamento do Suricata e expandir as suas capacidades para além das assinaturas estáticas nativas[cite: 17, 21]. O projeto focou-se em:
+O objetivo deste laboratório foi obter uma compreensão prática do funcionamento do Suricata e expandir as suas capacidades para além das assinaturas estáticas nativas. O projeto focou-se em:
 * Implementar uma infraestrutura de rede controlada no GNS3.
 * Desenvolver lógicas de deteção com estado (stateful) e inspeção profunda de payloads através da linguagem Lua.
 * Simular vetores de ataque focados na Camada 7 (Aplicação).
