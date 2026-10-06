@@ -14,7 +14,7 @@ O objetivo deste laboratório foi obter uma compreensão prática do funcionamen
 
 A topologia foi emulada no GNS3 e dividida logicamente para isolar o tráfego e simular um ambiente empresarial.
 
-![Esquema da Topologia da Rede no GNS3](recursos/topologia.png)
+![Esquema da Topologia da Rede no GNS3](Recursos/topologia.png)
 
 * **Monitorização:** Utilizou-se um Hub Ethernet no backbone da topologia para garantir a replicação física integral de todos os pacotes em trânsito para a interface do IDS.
 * **Interface de Captura:** O servidor Suricata necessitou de um endereço IP estático (10.0.0.3/24) na interface de monitorização para permitir que as transações HTTP TCP fossem completadas e analisadas pelo motor DPI.
