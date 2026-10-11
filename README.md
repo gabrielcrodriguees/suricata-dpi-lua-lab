@@ -1,64 +1,79 @@
-# Análise de Deteção de Ameaças com Suricata (DPI e Lua Scripting)
+# Suricata: DPI and Lua Scripting
 
-Este repositório contém os materiais do projeto desenvolvido para a unidade curricular de Segurança no Instituto Superior de Engenharia de Coimbra (ISEC). O foco principal foi criar um ambiente laboratorial para simular ataques de rede e analisar a eficácia do Suricata utilizando Deep Packet Inspection (DPI) e Lua Scripting.
+A virtual lab with a Suricata IDS extended with Lua scripts, using Deep Packet Inspection (DPI) to detect threats that static signatures can't catch.
+The project was developed for the *Security (Segurança)* course, Computer Engineering degree, ISEC (group project of 3).
 
-## Objetivo do Projeto
+## Overview
 
-O objetivo deste laboratório foi obter uma compreensão prática do funcionamento do Suricata e expandir as suas capacidades para além das assinaturas estáticas nativas. O projeto focou-se em:
-* Implementar uma infraestrutura de rede controlada no GNS3.
-* Desenvolver lógicas de deteção com estado (stateful) e inspeção profunda de payloads através da linguagem Lua.
-* Simular vetores de ataque focados na Camada 7 (Aplicação).
-* Analisar os alertas gerados para tentativas de exfiltração de dados e ferramentas ofensivas.
+Static pattern-matching rules are often ineffective against obfuscated traffic or attacks that change dynamically. This project uses Suricata not only as a header validator but as a DPI engine at the application layer (Layer 7), and extends it with Lua scripts to build detection logic with state and deep payload inspection.
 
-## Arquitetura da Testbed
+The lab was emulated in GNS3, and the detections were validated with attacks launched from a Kali Linux machine.
 
-A topologia foi emulada no GNS3 e dividida logicamente para isolar o tráfego e simular um ambiente empresarial.
+## Technologies Used
 
-![Esquema da Topologia da Rede no GNS3](Recursos/topologia.png)
+- **Suricata 6.0.20** — IDS / DPI engine
+- **Lua** — Custom detection logic
+- **GNS3** — Network emulation (Cisco IOU routers)
+- **Ubuntu** — Suricata sensor
+- **Kali Linux** — Attacker machine
 
-* **Monitorização:** Utilizou-se um Hub Ethernet no backbone da topologia para garantir a replicação física integral de todos os pacotes em trânsito para a interface do IDS.
-* **Interface de Captura:** O servidor Suricata necessitou de um endereço IP estático (10.0.0.3/24) na interface de monitorização para permitir que as transações HTTP TCP fossem completadas e analisadas pelo motor DPI.
-* **Máquinas:**
-  * **Atacante (Rede Externa):** VM Kali Linux para injeção de payloads.
-  * **IDS (Core de Inspeção):** VM Ubuntu Server com motor Suricata.
-  * **Alvos (Rede Interna):** Simulação de um serviço web na porta 80.
+## Lab Architecture
 
-## Simulação de Ataques e Análise
+![Network topology](images/topologia.png)
 
-Utilizámos a máquina Kali Linux para executar vetores de ataque específicos, os quais foram intercetados e classificados por quatro scripts Lua desenvolvidos para o projeto.
+The network is split into three zones:
 
-| Tipo de Ataque | Ferramenta / Script | Alvo | Descrição da Simulação |
-| :--- | :--- | :--- | :--- |
-| **Exfiltração de Dados (DLP)** | `dlp_cartao.lua` | Servidor Web | Envio de um pedido HTTP POST contendo uma string numérica formatada como um cartão de crédito (1111-2222-3333-4444). |
-| **Força Bruta** | `forca_bruta_contador.lua` | Login Web | Múltiplas submissões consecutivas de credenciais inválidas. O contador global stateful disparou o alerta ao exceder 3 tentativas falhadas. |
-| **Reconhecimento Web** | `detecao_agente.lua` | Aplicação Web | Injeção de tráfego web com cabeçalhos HTTP User-Agent alterados, utilizando assinaturas de ferramentas como sqlmap, nmap e nikto. |
-| **Download de Executáveis** | `bloq_exec.lua` | Rede Interna | Pedidos HTTP GET a recursos com extensões críticas de executáveis (.exe, .sh, .bat). |
+- **External zone:** attacker (Kali Linux), responsible for injecting malicious payloads.
+- **Inspection core:** Ubuntu server running Suricata, connected through an Ethernet hub on the backbone. The hub replicates every packet to the IDS interface without adding load to the routers.
+- **Internal zone:** victim machines and a simulated web service on port 80, which creates real TCP flows and HTTP transactions for the DPI.
 
-## Principais Descobertas
+## Detection Modules
 
-* **Eficácia de Deteção Avançada:** O Suricata provou ser capaz de detetar, pontuar e auditar profundamente os fluxos de rede quando suportado pela agilidade do Lua Scripting, superando firewalls de inspeção de estado tradicionais.
-* **Análise de Regras:** Identificámos as assinaturas específicas ativadas nos logs (fast.log) para cada cenário:
-  * Fuga de Cartão de Crédito: `sid: 100001`.
-  * Força Bruta (3 falhas): `sid: 100002`.
-  * Tool de Ataque (User-Agent): `sid: 100003`.
-  * Download Executável: `sid: 100004`.
-* **Estabilidade do Motor:** Optou-se por utilizar o Suricata versão 6.0.20 em vez da versão mais recente (v8) para garantir compatibilidade e acesso a documentação robusta da API Lua necessária para a implementação célere dos módulos.
+Each Lua script is called from a Suricata rule in `suricata.rules`:
 
-## Tecnologias e Ferramentas Utilizadas
+| Module | Script | What it detects |
+|--------|--------|-----------------|
+| DLP | `dlp_cartao.lua` | Credit card numbers (`XXXX-XXXX-XXXX-XXXX`) in HTTP request bodies |
+| Brute force | `forca_bruta_contador.lua` | Repeated failed logins, using a global counter (alert after 3 failures) |
+| Offensive tools | `detecao_agente.lua` | Signatures of tools such as `sqlmap`, `nmap` and `nikto` |
+| Executable downloads | `bloq_exec.lua` | Requests for `.exe`, `.sh` and `.bat` files |
 
-* **IDS/IPS:** Suricata v6.0.20
-* **Scripting DPI:** Lua v5.1
-* **Simulação de Rede:** GNS3
-* **Sistemas Operativos:** Ubuntu, Kali Linux
-* **Equipamentos de Rede:** Cisco IOU (Routing), Hub Ethernet (Mirroring)
 
-## Conteúdo do Repositório
+## Results
 
-* **Relatorio.pdf**: O relatório final detalhado cobrindo o enquadramento teórico, arquitetura, desafios de implementação e análise de logs.
-* **Apresentacao.pdf**: Os diapositivos de apresentação do projeto com o esquema da topologia e evidências do terminal.
+The attacks were launched from the Kali machine and each one generated an alert in `fast.log`:
 
-## Autores
+- **DLP:** HTTP POST with a credit card string triggered a Priority 1 alert (SID 100001).
+- **Brute force:** three consecutive failed logins triggered the alert (SID 100002).
+- **Offensive tools:** traffic with scanner signatures was identified and classified as a web application attack (SID 100003).
+- **Executables:** a request for a `.exe` file triggered a policy violation alert (SID 100004).
 
-* Artur Falcão
-* Gabriel Rodrigues
-* Rodrigo Prazeres
+Suricata ran in IDS mode, so the system detects and alerts but does not block traffic.
+
+## Challenges
+
+- **IP on the monitoring interface:** the sensor was designed to run without an IP address, but real TCP flows were needed for the DPI tests, so a static IP was assigned to the interface.
+- **Engine version:** Suricata 8.0.3 was tried first, but the lack of documented Lua examples for the new version led to using 6.0.20, which has much more community support.
+
+## How to Run
+
+1. Install Suricata 6.0.20 on the sensor machine.
+2. Copy the Lua scripts to `/etc/suricata/lua/`.
+3. Add the rules to `/etc/suricata/rules/suricata.rules`.
+4. Start Suricata:
+```bash
+   sudo suricata -c /etc/suricata/suricata.yaml -S /etc/suricata/rules/suricata.rules -i ens33 -v
+```
+5. In another terminal, follow the alerts:
+```bash
+   tail -f /var/log/suricata/fast.log
+```
+6. Launch the test traffic from the attacker machine.
+
+## Authors
+
+- Gabriel Cardoso Rodrigues
+- Artur Meireles de Sousa Falcão
+- Rodrigo Trindade Prazeres
+
+ISEC, Instituto Politécnico de Coimbra
