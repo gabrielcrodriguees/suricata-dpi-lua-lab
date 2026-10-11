@@ -19,7 +19,7 @@ The lab was emulated in GNS3, and the detections were validated with attacks lau
 
 ## Lab Architecture
 
-![Network topology](images/topologia.png)
+![Network topology](recursos/topologia.png)
 
 The network is split into three zones:
 
