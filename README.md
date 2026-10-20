@@ -11,11 +11,11 @@ The lab was emulated in GNS3, and the detections were validated with attacks lau
 
 ## Technologies Used
 
-- **Suricata 6.0.20** — IDS / DPI engine
-- **Lua** — Custom detection logic
-- **GNS3** — Network emulation (Cisco IOU routers)
-- **Ubuntu** — Suricata sensor
-- **Kali Linux** — Attacker machine
+- **Suricata 6.0.20**: IDS / DPI engine
+- **Lua**: Custom detection logic
+- **GNS3**: Network emulation (Cisco IOU routers)
+- **Ubuntu**: Suricata sensor
+- **Kali Linux**: Attacker machine
 
 ## Lab Architecture
 
@@ -72,8 +72,8 @@ Suricata ran in IDS mode, so the system detects and alerts but does not block tr
 
 ## Authors
 
-- Gabriel Cardoso Rodrigues
 - Artur Meireles de Sousa Falcão
+- Gabriel Cardoso Rodrigues
 - Rodrigo Trindade Prazeres
 
 ISEC, Instituto Politécnico de Coimbra
